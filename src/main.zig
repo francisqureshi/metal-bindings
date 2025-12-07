@@ -1,7 +1,7 @@
 const std = @import("std");
 const metal = @import("metal_bindings");
 
-// test jj
+// test jj again
 
 pub fn main() !void {
     std.debug.print("\n╔════════════════════════════════════════════════╗\n", .{});
