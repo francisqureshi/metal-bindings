@@ -5,7 +5,7 @@ const metal = @import("metal_bindings");
 
 pub fn main() !void {
     std.debug.print("\n╔════════════════════════════════════════════════╗\n", .{});
-    std.debug.print("║      Metal Bindings for Zig - Demo            ║\n", .{});
+    std.debug.print("║      Metal Bindings for Zig - Demo             ║\n", .{});
     std.debug.print("╚════════════════════════════════════════════════╝\n\n", .{});
 
     // Check Metal availability
