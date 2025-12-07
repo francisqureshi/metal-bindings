@@ -2,14 +2,6 @@
 
 A clean, generic Zig wrapper around Apple's Metal API for GPU compute.
 
-## Features
-
-- 🎯 Simple, type-safe Zig API
-- ⚡ Zero-overhead wrappers around Metal
-- 🔧 Support for compute shaders, buffers, textures
-- 📦 Easy to integrate as a Zig module
-- 🍎 macOS/iOS only (Metal is Apple-specific)
-
 ## Installation
 
 ### As a dependency (recommended)
