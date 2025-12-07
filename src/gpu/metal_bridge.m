@@ -16,6 +16,23 @@ void metal_release_device(MetalDevice device) {
     if (device) CFRelease(device);
 }
 
+uint32_t metal_get_device_count(void) {
+    NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
+    return (uint32_t)[devices count];
+}
+
+MetalDevice metal_get_device_at_index(uint32_t index) {
+    NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
+    if (index >= [devices count]) return NULL;
+    return (MetalDevice)CFBridgingRetain(devices[index]);
+}
+
+const char* metal_device_get_name(MetalDevice device) {
+    id<MTLDevice> dev = (__bridge id<MTLDevice>)device;
+    NSString* name = [dev name];
+    return strdup([name UTF8String]);
+}
+
 MetalCommandQueue metal_create_command_queue(MetalDevice device) {
     id<MTLDevice> dev = (__bridge id<MTLDevice>)device;
     id<MTLCommandQueue> queue = [dev newCommandQueue];
@@ -115,6 +132,13 @@ MetalBuffer metal_create_buffer(MetalDevice device, uint32_t size) {
     return (MetalBuffer)CFBridgingRetain(buffer);
 }
 
+MetalBuffer metal_create_buffer_with_options(MetalDevice device, uint32_t size, MetalResourceOptions options) {
+    id<MTLDevice> dev = (__bridge id<MTLDevice>)device;
+    id<MTLBuffer> buffer = [dev newBufferWithLength:size options:(MTLResourceOptions)options];
+    if (buffer == nil) return NULL;
+    return (MetalBuffer)CFBridgingRetain(buffer);
+}
+
 void metal_release_buffer(MetalBuffer buffer) {
     if (buffer) CFRelease(buffer);
 }
@@ -127,6 +151,16 @@ void metal_buffer_upload(MetalBuffer buffer, const void* data, uint32_t size) {
 void metal_buffer_download(MetalBuffer buffer, void* data, uint32_t size) {
     id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer;
     memcpy(data, [buf contents], size);
+}
+
+void* metal_buffer_get_contents(MetalBuffer buffer) {
+    id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer;
+    return [buf contents];
+}
+
+uint32_t metal_buffer_get_length(MetalBuffer buffer) {
+    id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer;
+    return (uint32_t)[buf length];
 }
 
 MetalCommandBuffer metal_create_command_buffer(MetalCommandQueue queue) {

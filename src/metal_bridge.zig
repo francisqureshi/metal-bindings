@@ -15,11 +15,20 @@ pub const MetalCommandBuffer = c.MetalCommandBuffer;
 pub const MetalCommandEncoder = c.MetalCommandEncoder;
 pub const MetalTexture = c.MetalTexture;
 pub const MetalBuffer = c.MetalBuffer;
+pub const MetalResourceOptions = c.MetalResourceOptions;
+
+// Re-export resource option constants
+pub const RESOURCE_STORAGE_MODE_SHARED = c.METAL_RESOURCE_STORAGE_MODE_SHARED;
+pub const RESOURCE_STORAGE_MODE_MANAGED = c.METAL_RESOURCE_STORAGE_MODE_MANAGED;
+pub const RESOURCE_STORAGE_MODE_PRIVATE = c.METAL_RESOURCE_STORAGE_MODE_PRIVATE;
 
 // Re-export functions
 pub const metal_is_available = c.metal_is_available;
 pub const metal_create_device = c.metal_create_device;
 pub const metal_release_device = c.metal_release_device;
+pub const metal_get_device_count = c.metal_get_device_count;
+pub const metal_get_device_at_index = c.metal_get_device_at_index;
+pub const metal_device_get_name = c.metal_device_get_name;
 pub const metal_create_command_queue = c.metal_create_command_queue;
 pub const metal_release_command_queue = c.metal_release_command_queue;
 pub const metal_create_library_from_source = c.metal_create_library_from_source;
@@ -33,9 +42,12 @@ pub const metal_release_texture = c.metal_release_texture;
 pub const metal_texture_upload = c.metal_texture_upload;
 pub const metal_texture_download = c.metal_texture_download;
 pub const metal_create_buffer = c.metal_create_buffer;
+pub const metal_create_buffer_with_options = c.metal_create_buffer_with_options;
 pub const metal_release_buffer = c.metal_release_buffer;
 pub const metal_buffer_upload = c.metal_buffer_upload;
 pub const metal_buffer_download = c.metal_buffer_download;
+pub const metal_buffer_get_contents = c.metal_buffer_get_contents;
+pub const metal_buffer_get_length = c.metal_buffer_get_length;
 pub const metal_create_command_buffer = c.metal_create_command_buffer;
 pub const metal_commit_command_buffer = c.metal_commit_command_buffer;
 pub const metal_wait_for_completion = c.metal_wait_for_completion;
