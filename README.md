@@ -14,17 +14,15 @@ A clean, generic Zig wrapper around Apple's Metal API for GPU compute.
 
 ### As a dependency (recommended)
 
-Add to your `build.zig.zon`:
+First, fetch the package:
 
-```zig
-.dependencies = .{
-    .metal_bindings = .{
-        .path = "/Users/fq/Zig/metal-bindings",
-    },
-},
+```bash
+zig fetch --save git+https://github.com/francisqureshi/metal-bindings.git
 ```
 
-In your `build.zig`:
+This will automatically add the dependency to your `build.zig.zon`.
+
+Then in your `build.zig`:
 
 ```zig
 const metal_dep = b.dependency("metal_bindings", .{
