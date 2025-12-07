@@ -24,6 +24,11 @@ bool metal_is_available(void);
 MetalDevice metal_create_device(void);
 void metal_release_device(MetalDevice device);
 
+// Device enumeration
+uint32_t metal_get_device_count(void);
+MetalDevice metal_get_device_at_index(uint32_t index);
+const char* metal_device_get_name(MetalDevice device);
+
 // Command queue
 MetalCommandQueue metal_create_command_queue(MetalDevice device);
 void metal_release_command_queue(MetalCommandQueue queue);
@@ -44,11 +49,20 @@ void metal_release_texture(MetalTexture texture);
 void metal_texture_upload(MetalTexture texture, const void* data, uint32_t width, uint32_t height, uint32_t bytes_per_row);
 void metal_texture_download(MetalTexture texture, void* data, uint32_t width, uint32_t height, uint32_t bytes_per_row);
 
+// Resource options (matches Metal's MTLResourceOptions)
+typedef uint32_t MetalResourceOptions;
+#define METAL_RESOURCE_STORAGE_MODE_SHARED 0
+#define METAL_RESOURCE_STORAGE_MODE_MANAGED (1 << 4)
+#define METAL_RESOURCE_STORAGE_MODE_PRIVATE (2 << 4)
+
 // Buffers
 MetalBuffer metal_create_buffer(MetalDevice device, uint32_t size);
+MetalBuffer metal_create_buffer_with_options(MetalDevice device, uint32_t size, MetalResourceOptions options);
 void metal_release_buffer(MetalBuffer buffer);
 void metal_buffer_upload(MetalBuffer buffer, const void* data, uint32_t size);
 void metal_buffer_download(MetalBuffer buffer, void* data, uint32_t size);
+void* metal_buffer_get_contents(MetalBuffer buffer);
+uint32_t metal_buffer_get_length(MetalBuffer buffer);
 
 // Command encoding
 MetalCommandBuffer metal_create_command_buffer(MetalCommandQueue queue);
