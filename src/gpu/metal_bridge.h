@@ -14,8 +14,10 @@ typedef void* MetalCommandQueue;
 typedef void* MetalLibrary;
 typedef void* MetalFunction;
 typedef void* MetalPipeline;
+typedef void* MetalRenderPipeline;
 typedef void* MetalCommandBuffer;
 typedef void* MetalCommandEncoder;
+typedef void* MetalRenderPassDescriptor;
 typedef void* MetalTexture;
 typedef void* MetalBuffer;
 
@@ -82,6 +84,63 @@ void metal_release_encoder(MetalCommandEncoder encoder);
 // Blit encoder
 MetalCommandEncoder metal_create_blit_encoder(MetalCommandBuffer buffer);
 void metal_blit_copy_buffer(MetalCommandEncoder encoder, MetalBuffer src, MetalBuffer dst, uint32_t size);
+
+// Render pipeline
+typedef struct {
+    uint32_t pixel_format;  // MTLPixelFormat (e.g., MTLPixelFormatBGRA8Unorm = 80)
+    bool blend_enabled;
+    uint32_t source_rgb_blend_factor;
+    uint32_t destination_rgb_blend_factor;
+    uint32_t rgb_blend_operation;
+    uint32_t source_alpha_blend_factor;
+    uint32_t destination_alpha_blend_factor;
+    uint32_t alpha_blend_operation;
+} MetalRenderPipelineDescriptor;
+
+MetalRenderPipeline metal_create_render_pipeline(
+    MetalDevice device,
+    MetalFunction vertex_function,
+    MetalFunction fragment_function,
+    const MetalRenderPipelineDescriptor* descriptor,
+    char** error_msg
+);
+void metal_release_render_pipeline(MetalRenderPipeline pipeline);
+
+// Render pass descriptor
+MetalRenderPassDescriptor metal_create_render_pass_descriptor(void);
+void metal_release_render_pass_descriptor(MetalRenderPassDescriptor descriptor);
+void metal_render_pass_set_color_texture(MetalRenderPassDescriptor descriptor, MetalTexture texture, uint32_t index);
+void metal_render_pass_set_clear_color(MetalRenderPassDescriptor descriptor, double r, double g, double b, double a, uint32_t index);
+
+// Render encoder
+MetalCommandEncoder metal_create_render_encoder(MetalCommandBuffer buffer, MetalRenderPassDescriptor descriptor);
+void metal_render_encoder_set_pipeline(MetalCommandEncoder encoder, MetalRenderPipeline pipeline);
+void metal_render_encoder_set_vertex_buffer(MetalCommandEncoder encoder, MetalBuffer buffer, uint32_t offset, uint32_t index);
+void metal_render_encoder_set_vertex_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index);
+void metal_render_encoder_set_fragment_buffer(MetalCommandEncoder encoder, MetalBuffer buffer, uint32_t offset, uint32_t index);
+void metal_render_encoder_set_fragment_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index);
+void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t vertex_start, uint32_t vertex_count);
+
+// Pixel formats (common ones)
+#define METAL_PIXEL_FORMAT_BGRA8_UNORM 80
+#define METAL_PIXEL_FORMAT_RGBA8_UNORM 70
+#define METAL_PIXEL_FORMAT_RGBA32_FLOAT 115
+
+// Blend factors
+#define METAL_BLEND_FACTOR_ZERO 0
+#define METAL_BLEND_FACTOR_ONE 1
+#define METAL_BLEND_FACTOR_SOURCE_ALPHA 4
+#define METAL_BLEND_FACTOR_ONE_MINUS_SOURCE_ALPHA 5
+
+// Blend operations
+#define METAL_BLEND_OP_ADD 0
+
+// Primitive types
+#define METAL_PRIMITIVE_TYPE_POINT 0
+#define METAL_PRIMITIVE_TYPE_LINE 1
+#define METAL_PRIMITIVE_TYPE_LINE_STRIP 2
+#define METAL_PRIMITIVE_TYPE_TRIANGLE 3
+#define METAL_PRIMITIVE_TYPE_TRIANGLE_STRIP 4
 
 #ifdef __cplusplus
 }

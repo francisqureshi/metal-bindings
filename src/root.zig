@@ -21,8 +21,10 @@ pub const CommandQueue = c.MetalCommandQueue;
 pub const Library = c.MetalLibrary;
 pub const Function = c.MetalFunction;
 pub const Pipeline = c.MetalPipeline;
+pub const RenderPipeline = c.MetalRenderPipeline;
 pub const CommandBuffer = c.MetalCommandBuffer;
 pub const CommandEncoder = c.MetalCommandEncoder;
+pub const RenderPassDescriptor = c.MetalRenderPassDescriptor;
 pub const Texture = c.MetalTexture;
 pub const Buffer = c.MetalBuffer;
 
@@ -357,6 +359,45 @@ pub const MetalFunction = struct {
         };
         return .{ .handle = pipeline };
     }
+
+    /// Create a render pipeline from vertex and fragment functions.
+    ///
+    /// Example:
+    /// ```zig
+    /// var vertex_fn = try library.createFunction("vertexShader");
+    /// defer vertex_fn.deinit();
+    /// var fragment_fn = try library.createFunction("fragmentShader");
+    /// defer fragment_fn.deinit();
+    ///
+    /// const desc = RenderPipelineDescriptor{
+    ///     .pixel_format = .bgra8_unorm,
+    /// };
+    /// var pipeline = try vertex_fn.createRenderPipeline(&device, &fragment_fn, desc);
+    /// defer pipeline.deinit();
+    /// ```
+    pub fn createRenderPipeline(
+        self: *MetalFunction,
+        device: *MetalDevice,
+        fragment_function: *MetalFunction,
+        descriptor: RenderPipelineDescriptor,
+    ) MetalError!MetalRenderPipelineState {
+        var error_msg: [*c]u8 = null;
+        const c_desc = descriptor.toCDescriptor();
+        const pipeline = c.metal_create_render_pipeline(
+            device.handle,
+            self.handle,
+            fragment_function.handle,
+            &c_desc,
+            @ptrCast(&error_msg),
+        ) orelse {
+            if (error_msg) |msg| {
+                std.debug.print("Metal render pipeline error: {s}\n", .{msg});
+                std.c.free(msg);
+            }
+            return MetalError.PipelineCreationFailed;
+        };
+        return .{ .handle = pipeline };
+    }
 };
 
 /// Compute pipeline state.
@@ -486,6 +527,11 @@ pub const MetalCommandBuffer = struct {
         const encoder = c.metal_create_blit_encoder(self.handle) orelse return MetalError.CommandBufferCreationFailed;
         return .{ .handle = encoder };
     }
+
+    pub fn createRenderEncoder(self: *MetalCommandBuffer, render_pass: *MetalRenderPassDescriptor) MetalError!MetalRenderEncoder {
+        const encoder = c.metal_create_render_encoder(self.handle, render_pass.handle) orelse return MetalError.CommandBufferCreationFailed;
+        return .{ .handle = encoder };
+    }
 };
 
 /// Metal Compute Encoder wrapper
@@ -534,6 +580,127 @@ pub const MetalBlitEncoder = struct {
     }
 
     pub fn end(self: *MetalBlitEncoder) void {
+        c.metal_encoder_end(self.handle);
+    }
+};
+
+/// Pixel format for textures and render targets
+pub const PixelFormat = enum(u32) {
+    bgra8_unorm = c.PIXEL_FORMAT_BGRA8_UNORM,
+    rgba8_unorm = c.PIXEL_FORMAT_RGBA8_UNORM,
+    rgba32_float = c.PIXEL_FORMAT_RGBA32_FLOAT,
+};
+
+/// Blend factor for render pipeline blending
+pub const BlendFactor = enum(u32) {
+    zero = c.BLEND_FACTOR_ZERO,
+    one = c.BLEND_FACTOR_ONE,
+    source_alpha = c.BLEND_FACTOR_SOURCE_ALPHA,
+    one_minus_source_alpha = c.BLEND_FACTOR_ONE_MINUS_SOURCE_ALPHA,
+};
+
+/// Blend operation for render pipeline blending
+pub const BlendOperation = enum(u32) {
+    add = c.BLEND_OP_ADD,
+};
+
+/// Primitive type for rendering
+pub const PrimitiveType = enum(u32) {
+    point = c.PRIMITIVE_TYPE_POINT,
+    line = c.PRIMITIVE_TYPE_LINE,
+    line_strip = c.PRIMITIVE_TYPE_LINE_STRIP,
+    triangle = c.PRIMITIVE_TYPE_TRIANGLE,
+    triangle_strip = c.PRIMITIVE_TYPE_TRIANGLE_STRIP,
+};
+
+/// Render pipeline descriptor for creating render pipelines
+pub const RenderPipelineDescriptor = struct {
+    pixel_format: PixelFormat = .bgra8_unorm,
+    blend_enabled: bool = false,
+    source_rgb_blend_factor: BlendFactor = .one,
+    destination_rgb_blend_factor: BlendFactor = .zero,
+    rgb_blend_operation: BlendOperation = .add,
+    source_alpha_blend_factor: BlendFactor = .one,
+    destination_alpha_blend_factor: BlendFactor = .zero,
+    alpha_blend_operation: BlendOperation = .add,
+
+    fn toCDescriptor(self: *const RenderPipelineDescriptor) c.MetalRenderPipelineDescriptor {
+        return .{
+            .pixel_format = @intFromEnum(self.pixel_format),
+            .blend_enabled = self.blend_enabled,
+            .source_rgb_blend_factor = @intFromEnum(self.source_rgb_blend_factor),
+            .destination_rgb_blend_factor = @intFromEnum(self.destination_rgb_blend_factor),
+            .rgb_blend_operation = @intFromEnum(self.rgb_blend_operation),
+            .source_alpha_blend_factor = @intFromEnum(self.source_alpha_blend_factor),
+            .destination_alpha_blend_factor = @intFromEnum(self.destination_alpha_blend_factor),
+            .alpha_blend_operation = @intFromEnum(self.alpha_blend_operation),
+        };
+    }
+};
+
+/// Metal render pipeline state
+pub const MetalRenderPipelineState = struct {
+    handle: RenderPipeline,
+
+    pub fn deinit(self: *MetalRenderPipelineState) void {
+        c.metal_release_render_pipeline(self.handle);
+    }
+};
+
+/// Metal render pass descriptor
+pub const MetalRenderPassDescriptor = struct {
+    handle: RenderPassDescriptor,
+
+    pub fn init() MetalRenderPassDescriptor {
+        return .{ .handle = c.metal_create_render_pass_descriptor() };
+    }
+
+    pub fn deinit(self: *MetalRenderPassDescriptor) void {
+        c.metal_release_render_pass_descriptor(self.handle);
+    }
+
+    pub fn setColorTexture(self: *MetalRenderPassDescriptor, texture: *MetalTexture, index: u32) void {
+        c.metal_render_pass_set_color_texture(self.handle, texture.handle, index);
+    }
+
+    pub fn setClearColor(self: *MetalRenderPassDescriptor, r: f64, g: f64, b: f64, a: f64, index: u32) void {
+        c.metal_render_pass_set_clear_color(self.handle, r, g, b, a, index);
+    }
+};
+
+/// Metal render command encoder
+pub const MetalRenderEncoder = struct {
+    handle: CommandEncoder,
+
+    pub fn deinit(self: *MetalRenderEncoder) void {
+        c.metal_release_encoder(self.handle);
+    }
+
+    pub fn setPipeline(self: *MetalRenderEncoder, pipeline: *MetalRenderPipelineState) void {
+        c.metal_render_encoder_set_pipeline(self.handle, pipeline.handle);
+    }
+
+    pub fn setVertexBuffer(self: *MetalRenderEncoder, buffer: *MetalBuffer, offset: u32, index: u32) void {
+        c.metal_render_encoder_set_vertex_buffer(self.handle, buffer.handle, offset, index);
+    }
+
+    pub fn setVertexBytes(self: *MetalRenderEncoder, bytes: *const anyopaque, length: u32, index: u32) void {
+        c.metal_render_encoder_set_vertex_bytes(self.handle, bytes, length, index);
+    }
+
+    pub fn setFragmentBuffer(self: *MetalRenderEncoder, buffer: *MetalBuffer, offset: u32, index: u32) void {
+        c.metal_render_encoder_set_fragment_buffer(self.handle, buffer.handle, offset, index);
+    }
+
+    pub fn setFragmentBytes(self: *MetalRenderEncoder, bytes: *const anyopaque, length: u32, index: u32) void {
+        c.metal_render_encoder_set_fragment_bytes(self.handle, bytes, length, index);
+    }
+
+    pub fn drawPrimitives(self: *MetalRenderEncoder, primitive_type: PrimitiveType, vertex_start: u32, vertex_count: u32) void {
+        c.metal_render_encoder_draw_primitives(self.handle, @intFromEnum(primitive_type), vertex_start, vertex_count);
+    }
+
+    pub fn end(self: *MetalRenderEncoder) void {
         c.metal_encoder_end(self.handle);
     }
 };

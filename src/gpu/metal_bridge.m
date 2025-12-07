@@ -247,3 +247,113 @@ void metal_blit_copy_buffer(MetalCommandEncoder encoder, MetalBuffer src, MetalB
 
     [blitEnc copyFromBuffer:srcBuf sourceOffset:0 toBuffer:dstBuf destinationOffset:0 size:size];
 }
+
+// Render pipeline
+MetalRenderPipeline metal_create_render_pipeline(
+    MetalDevice device,
+    MetalFunction vertex_function,
+    MetalFunction fragment_function,
+    const MetalRenderPipelineDescriptor* descriptor,
+    char** error_msg)
+{
+    id<MTLDevice> dev = (__bridge id<MTLDevice>)device;
+    id<MTLFunction> vertexFunc = (__bridge id<MTLFunction>)vertex_function;
+    id<MTLFunction> fragmentFunc = (__bridge id<MTLFunction>)fragment_function;
+
+    MTLRenderPipelineDescriptor* pipelineDesc = [[MTLRenderPipelineDescriptor alloc] init];
+    pipelineDesc.vertexFunction = vertexFunc;
+    pipelineDesc.fragmentFunction = fragmentFunc;
+
+    // Configure color attachment
+    pipelineDesc.colorAttachments[0].pixelFormat = (MTLPixelFormat)descriptor->pixel_format;
+
+    if (descriptor->blend_enabled) {
+        pipelineDesc.colorAttachments[0].blendingEnabled = YES;
+        pipelineDesc.colorAttachments[0].sourceRGBBlendFactor = (MTLBlendFactor)descriptor->source_rgb_blend_factor;
+        pipelineDesc.colorAttachments[0].destinationRGBBlendFactor = (MTLBlendFactor)descriptor->destination_rgb_blend_factor;
+        pipelineDesc.colorAttachments[0].rgbBlendOperation = (MTLBlendOperation)descriptor->rgb_blend_operation;
+        pipelineDesc.colorAttachments[0].sourceAlphaBlendFactor = (MTLBlendFactor)descriptor->source_alpha_blend_factor;
+        pipelineDesc.colorAttachments[0].destinationAlphaBlendFactor = (MTLBlendFactor)descriptor->destination_alpha_blend_factor;
+        pipelineDesc.colorAttachments[0].alphaBlendOperation = (MTLBlendOperation)descriptor->alpha_blend_operation;
+    }
+
+    NSError* error = nil;
+    id<MTLRenderPipelineState> pipeline = [dev newRenderPipelineStateWithDescriptor:pipelineDesc error:&error];
+
+    if (error && error_msg) {
+        NSString* errStr = [error localizedDescription];
+        *error_msg = strdup([errStr UTF8String]);
+    }
+
+    if (pipeline == nil) return NULL;
+    return (MetalRenderPipeline)CFBridgingRetain(pipeline);
+}
+
+void metal_release_render_pipeline(MetalRenderPipeline pipeline) {
+    if (pipeline) CFRelease(pipeline);
+}
+
+// Render pass descriptor
+MetalRenderPassDescriptor metal_create_render_pass_descriptor(void) {
+    MTLRenderPassDescriptor* desc = [MTLRenderPassDescriptor renderPassDescriptor];
+    return (MetalRenderPassDescriptor)CFBridgingRetain(desc);
+}
+
+void metal_release_render_pass_descriptor(MetalRenderPassDescriptor descriptor) {
+    if (descriptor) CFRelease(descriptor);
+}
+
+void metal_render_pass_set_color_texture(MetalRenderPassDescriptor descriptor, MetalTexture texture, uint32_t index) {
+    MTLRenderPassDescriptor* desc = (__bridge MTLRenderPassDescriptor*)descriptor;
+    id<MTLTexture> tex = (__bridge id<MTLTexture>)texture;
+    desc.colorAttachments[index].texture = tex;
+    desc.colorAttachments[index].loadAction = MTLLoadActionClear;
+    desc.colorAttachments[index].storeAction = MTLStoreActionStore;
+}
+
+void metal_render_pass_set_clear_color(MetalRenderPassDescriptor descriptor, double r, double g, double b, double a, uint32_t index) {
+    MTLRenderPassDescriptor* desc = (__bridge MTLRenderPassDescriptor*)descriptor;
+    desc.colorAttachments[index].clearColor = MTLClearColorMake(r, g, b, a);
+}
+
+// Render encoder
+MetalCommandEncoder metal_create_render_encoder(MetalCommandBuffer buffer, MetalRenderPassDescriptor descriptor) {
+    id<MTLCommandBuffer> cmdBuf = (__bridge id<MTLCommandBuffer>)buffer;
+    MTLRenderPassDescriptor* passDesc = (__bridge MTLRenderPassDescriptor*)descriptor;
+    id<MTLRenderCommandEncoder> encoder = [cmdBuf renderCommandEncoderWithDescriptor:passDesc];
+    if (encoder == nil) return NULL;
+    return (MetalCommandEncoder)CFBridgingRetain(encoder);
+}
+
+void metal_render_encoder_set_pipeline(MetalCommandEncoder encoder, MetalRenderPipeline pipeline) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline;
+    [enc setRenderPipelineState:pipe];
+}
+
+void metal_render_encoder_set_vertex_buffer(MetalCommandEncoder encoder, MetalBuffer buffer, uint32_t offset, uint32_t index) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer;
+    [enc setVertexBuffer:buf offset:offset atIndex:index];
+}
+
+void metal_render_encoder_set_vertex_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    [enc setVertexBytes:bytes length:length atIndex:index];
+}
+
+void metal_render_encoder_set_fragment_buffer(MetalCommandEncoder encoder, MetalBuffer buffer, uint32_t offset, uint32_t index) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer;
+    [enc setFragmentBuffer:buf offset:offset atIndex:index];
+}
+
+void metal_render_encoder_set_fragment_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    [enc setFragmentBytes:bytes length:length atIndex:index];
+}
+
+void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t vertex_start, uint32_t vertex_count) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    [enc drawPrimitives:(MTLPrimitiveType)primitive_type vertexStart:vertex_start vertexCount:vertex_count];
+}
