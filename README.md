@@ -57,8 +57,8 @@ pub fn main() !void {
         \\#include <metal_stdlib>
         \\using namespace metal;
         \\
-        \\kernel void my_kernel(device float* data [[buffer(0)]]) {
-        \\    uint index = thread_position_in_grid.x;
+        \\kernel void my_kernel(device float* data [[buffer(0)]],
+        \\                      uint index [[thread_position_in_grid]]) {
         \\    data[index] *= 2.0;
         \\}
     ;
