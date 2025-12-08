@@ -24,15 +24,6 @@ const metal_dep = b.dependency("metal_bindings", .{
 exe.root_module.addImport("metal", metal_dep.module("metal_bindings"));
 ```
 
-### Build from source
-
-```bash
-cd /Users/fq/Zig/metal-bindings
-zig build        # Build library
-zig build run    # Run example
-zig build test   # Run tests
-```
-
 ## Quick Examples
 
 ### Compute Shader Example
@@ -251,6 +242,7 @@ queue.createCommandBuffer() -> !MetalCommandBuffer
 cmdBuffer.createComputeEncoder() -> !MetalComputeEncoder
 cmdBuffer.createRenderEncoder(render_pass: *MetalRenderPassDescriptor) -> !MetalRenderEncoder
 cmdBuffer.createBlitEncoder() -> !MetalBlitEncoder
+cmdBuffer.present(drawable_ptr: ?*anyopaque) -> void  // Schedule drawable presentation
 cmdBuffer.commit() -> void
 cmdBuffer.waitForCompletion() -> void
 
@@ -284,12 +276,34 @@ buffer.getContentsAs(T: type) -> ?[]T
 // Texture
 texture.upload(data: []const u8, width: u32, height: u32, bytes_per_row: u32) -> void
 texture.download(data: []u8, width: u32, height: u32, bytes_per_row: u32) -> void
+MetalTexture.initFromPtr(texture_ptr: Texture) -> MetalTexture  // Wrap external MTLTexture
 ```
 
-## License
+## Rendering to Screen
 
-MIT
+For rendering to a window, use the command buffer's `present()` method to schedule drawable presentation:
 
-## Contributing
+```zig
+// Get drawable from CAMetalLayer (via platform-specific bridge)
+const drawable_ptr = getNextDrawable(layer);
+const texture_ptr = getDrawableTexture(drawable_ptr);
 
-This is a generic Metal bindings library. Keep it simple and free of application-specific code (no OFX, NDI, or other domain-specific functionality).
+// Wrap the drawable's texture
+var drawable_texture = metal.MetalTexture.initFromPtr(texture_ptr);
+
+// Set up render pass with drawable texture as render target
+var render_pass = metal.MetalRenderPassDescriptor.init();
+render_pass.setColorTexture(&drawable_texture, 0);
+
+// Encode rendering commands
+var encoder = cmd_buffer.createRenderEncoder(&render_pass);
+encoder.setPipeline(&pipeline);
+encoder.drawPrimitives(.triangle, 0, 3);
+encoder.end();
+
+// Schedule presentation and commit (order matters!)
+cmd_buffer.present(drawable_ptr);
+cmd_buffer.commit();
+```
+
+The `present()` method ensures the drawable is presented when GPU rendering completes, providing proper synchronization.
