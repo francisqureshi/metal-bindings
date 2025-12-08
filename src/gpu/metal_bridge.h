@@ -20,6 +20,7 @@ typedef void* MetalCommandEncoder;
 typedef void* MetalRenderPassDescriptor;
 typedef void* MetalTexture;
 typedef void* MetalBuffer;
+typedef void* MetalDrawable;
 
 // Metal context creation/destruction
 bool metal_is_available(void);
@@ -70,6 +71,7 @@ uint32_t metal_buffer_get_length(MetalBuffer buffer);
 MetalCommandBuffer metal_create_command_buffer(MetalCommandQueue queue);
 void metal_commit_command_buffer(MetalCommandBuffer buffer);
 void metal_wait_for_completion(MetalCommandBuffer buffer);
+void metal_command_buffer_present_drawable(MetalCommandBuffer buffer, void* drawable);
 void metal_release_command_buffer(MetalCommandBuffer buffer);
 
 MetalCommandEncoder metal_create_compute_encoder(MetalCommandBuffer buffer);
@@ -120,6 +122,10 @@ void metal_render_encoder_set_vertex_bytes(MetalCommandEncoder encoder, const vo
 void metal_render_encoder_set_fragment_buffer(MetalCommandEncoder encoder, MetalBuffer buffer, uint32_t offset, uint32_t index);
 void metal_render_encoder_set_fragment_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index);
 void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t vertex_start, uint32_t vertex_count);
+
+// Drawable functions
+MetalTexture metal_drawable_get_texture(MetalDrawable drawable);
+void metal_drawable_present(MetalDrawable drawable);
 
 // Pixel formats (common ones)
 #define METAL_PIXEL_FORMAT_BGRA8_UNORM 80

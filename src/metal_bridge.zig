@@ -17,6 +17,7 @@ pub const MetalCommandEncoder = c.MetalCommandEncoder;
 pub const MetalRenderPassDescriptor = c.MetalRenderPassDescriptor;
 pub const MetalTexture = c.MetalTexture;
 pub const MetalBuffer = c.MetalBuffer;
+pub const MetalDrawable = c.MetalDrawable;
 pub const MetalResourceOptions = c.MetalResourceOptions;
 pub const MetalRenderPipelineDescriptor = c.MetalRenderPipelineDescriptor;
 
@@ -54,6 +55,7 @@ pub const metal_buffer_get_length = c.metal_buffer_get_length;
 pub const metal_create_command_buffer = c.metal_create_command_buffer;
 pub const metal_commit_command_buffer = c.metal_commit_command_buffer;
 pub const metal_wait_for_completion = c.metal_wait_for_completion;
+pub const metal_command_buffer_present_drawable = c.metal_command_buffer_present_drawable;
 pub const metal_release_command_buffer = c.metal_release_command_buffer;
 pub const metal_create_compute_encoder = c.metal_create_compute_encoder;
 pub const metal_encoder_set_pipeline = c.metal_encoder_set_pipeline;
@@ -105,3 +107,7 @@ pub const PRIMITIVE_TYPE_LINE = c.METAL_PRIMITIVE_TYPE_LINE;
 pub const PRIMITIVE_TYPE_LINE_STRIP = c.METAL_PRIMITIVE_TYPE_LINE_STRIP;
 pub const PRIMITIVE_TYPE_TRIANGLE = c.METAL_PRIMITIVE_TYPE_TRIANGLE;
 pub const PRIMITIVE_TYPE_TRIANGLE_STRIP = c.METAL_PRIMITIVE_TYPE_TRIANGLE_STRIP;
+
+// Drawable functions
+pub const metal_drawable_get_texture = c.metal_drawable_get_texture;
+pub const metal_drawable_present = c.metal_drawable_present;

@@ -27,6 +27,7 @@ pub const CommandEncoder = c.MetalCommandEncoder;
 pub const RenderPassDescriptor = c.MetalRenderPassDescriptor;
 pub const Texture = c.MetalTexture;
 pub const Buffer = c.MetalBuffer;
+pub const Drawable = c.MetalDrawable;
 
 /// Resource storage mode for Metal buffers.
 ///
@@ -493,6 +494,12 @@ pub const MetalTexture = struct {
         c.metal_release_texture(self.handle);
     }
 
+    /// Create a MetalTexture wrapper from an existing texture pointer
+    /// This is used for textures created by the system (like drawable textures)
+    pub fn initFromPtr(texture_ptr: Texture) MetalTexture {
+        return .{ .handle = texture_ptr };
+    }
+
     pub fn upload(self: *MetalTexture, data: []const u8, width: u32, height: u32, bytes_per_row: u32) void {
         c.metal_texture_upload(self.handle, data.ptr, width, height, bytes_per_row);
     }
@@ -516,6 +523,14 @@ pub const MetalCommandBuffer = struct {
 
     pub fn waitForCompletion(self: *MetalCommandBuffer) void {
         c.metal_wait_for_completion(self.handle);
+    }
+
+    /// Schedule presentation of a drawable when the command buffer completes
+    /// This is the correct way to present in Metal - call this BEFORE commit()
+    pub fn present(self: *MetalCommandBuffer, drawable_ptr: ?*anyopaque) void {
+        if (drawable_ptr) |ptr| {
+            c.metal_command_buffer_present_drawable(self.handle, ptr);
+        }
     }
 
     pub fn createComputeEncoder(self: *MetalCommandBuffer) MetalError!MetalComputeEncoder {
@@ -702,6 +717,57 @@ pub const MetalRenderEncoder = struct {
 
     pub fn end(self: *MetalRenderEncoder) void {
         c.metal_encoder_end(self.handle);
+    }
+};
+
+/// Metal Drawable wrapper
+/// Represents a drawable surface that can be rendered to and presented.
+///
+/// Example:
+/// ```zig
+/// // Get drawable from CAMetalLayer (via Swift bridge)
+/// const drawable_ptr = c.metal_layer_get_next_drawable(layer);
+/// var drawable = metal.MetalDrawable{ .handle = drawable_ptr };
+///
+/// // Get texture for rendering
+/// var texture = drawable.getTexture();
+/// defer texture.deinit();
+///
+/// // ... render to texture ...
+///
+/// // Present the drawable
+/// drawable.present();
+/// ```
+pub const MetalDrawable = struct {
+    handle: Drawable,
+
+    /// Get the texture associated with this drawable.
+    /// This texture can be used as a render target.
+    /// Caller owns the returned texture and must release it.
+    ///
+    /// Example:
+    /// ```zig
+    /// var texture = drawable.getTexture();
+    /// defer texture.deinit();
+    ///
+    /// // Use texture in render pass descriptor
+    /// render_pass.setColorTexture(&texture, 0);
+    /// ```
+    pub fn getTexture(self: *const MetalDrawable) MetalTexture {
+        const texture = c.metal_drawable_get_texture(self.handle);
+        return .{ .handle = texture };
+    }
+
+    /// Present the drawable to the screen.
+    /// This should be called after rendering is complete.
+    ///
+    /// Example:
+    /// ```zig
+    /// // After command buffer completes
+    /// drawable.present();
+    /// ```
+    pub fn present(self: *const MetalDrawable) void {
+        c.metal_drawable_present(self.handle);
     }
 };
 

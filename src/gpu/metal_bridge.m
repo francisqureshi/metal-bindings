@@ -1,4 +1,5 @@
 #import <Metal/Metal.h>
+#import <QuartzCore/QuartzCore.h>
 #import <Foundation/Foundation.h>
 #import "metal_bridge.h"
 #include <string.h>
@@ -180,6 +181,12 @@ void metal_wait_for_completion(MetalCommandBuffer buffer) {
     [buf waitUntilCompleted];
 }
 
+void metal_command_buffer_present_drawable(MetalCommandBuffer buffer, void* drawable) {
+    id<MTLCommandBuffer> buf = (__bridge id<MTLCommandBuffer>)buffer;
+    id<CAMetalDrawable> metalDrawable = (__bridge id<CAMetalDrawable>)drawable;
+    [buf presentDrawable:metalDrawable];
+}
+
 void metal_release_command_buffer(MetalCommandBuffer buffer) {
     if (buffer) CFRelease(buffer);
 }
@@ -356,4 +363,17 @@ void metal_render_encoder_set_fragment_bytes(MetalCommandEncoder encoder, const 
 void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t vertex_start, uint32_t vertex_count) {
     id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
     [enc drawPrimitives:(MTLPrimitiveType)primitive_type vertexStart:vertex_start vertexCount:vertex_count];
+}
+
+// Drawable functions
+MetalTexture metal_drawable_get_texture(MetalDrawable drawable) {
+    id<CAMetalDrawable> draw = (__bridge id<CAMetalDrawable>)drawable;
+    id<MTLTexture> texture = [draw texture];
+    if (texture == nil) return NULL;
+    return (MetalTexture)CFBridgingRetain(texture);
+}
+
+void metal_drawable_present(MetalDrawable drawable) {
+    id<CAMetalDrawable> draw = (__bridge id<CAMetalDrawable>)drawable;
+    [draw present];
 }
