@@ -365,6 +365,17 @@ void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t 
     [enc drawPrimitives:(MTLPrimitiveType)primitive_type vertexStart:vertex_start vertexCount:vertex_count];
 }
 
+void metal_render_encoder_draw_indexed_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t index_count, uint32_t index_type, MetalBuffer index_buffer, uint32_t index_buffer_offset) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    id<MTLBuffer> buf = (__bridge id<MTLBuffer>)index_buffer;
+    MTLIndexType mtl_index_type = (index_type == 0) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
+    [enc drawIndexedPrimitives:(MTLPrimitiveType)primitive_type
+                    indexCount:index_count
+                     indexType:mtl_index_type
+                   indexBuffer:buf
+             indexBufferOffset:index_buffer_offset];
+}
+
 // Drawable functions
 MetalTexture metal_drawable_get_texture(MetalDrawable drawable) {
     id<CAMetalDrawable> draw = (__bridge id<CAMetalDrawable>)drawable;

@@ -122,6 +122,7 @@ void metal_render_encoder_set_vertex_bytes(MetalCommandEncoder encoder, const vo
 void metal_render_encoder_set_fragment_buffer(MetalCommandEncoder encoder, MetalBuffer buffer, uint32_t offset, uint32_t index);
 void metal_render_encoder_set_fragment_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index);
 void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t vertex_start, uint32_t vertex_count);
+void metal_render_encoder_draw_indexed_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t index_count, uint32_t index_type, MetalBuffer index_buffer, uint32_t index_buffer_offset);
 
 // Drawable functions
 MetalTexture metal_drawable_get_texture(MetalDrawable drawable);
@@ -147,6 +148,10 @@ void metal_drawable_present(MetalDrawable drawable);
 #define METAL_PRIMITIVE_TYPE_LINE_STRIP 2
 #define METAL_PRIMITIVE_TYPE_TRIANGLE 3
 #define METAL_PRIMITIVE_TYPE_TRIANGLE_STRIP 4
+
+// Index types (for indexed drawing)
+#define METAL_INDEX_TYPE_UINT16 0
+#define METAL_INDEX_TYPE_UINT32 1
 
 #ifdef __cplusplus
 }

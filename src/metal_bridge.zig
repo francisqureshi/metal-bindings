@@ -108,6 +108,13 @@ pub const PRIMITIVE_TYPE_LINE_STRIP = c.METAL_PRIMITIVE_TYPE_LINE_STRIP;
 pub const PRIMITIVE_TYPE_TRIANGLE = c.METAL_PRIMITIVE_TYPE_TRIANGLE;
 pub const PRIMITIVE_TYPE_TRIANGLE_STRIP = c.METAL_PRIMITIVE_TYPE_TRIANGLE_STRIP;
 
+// Index type constants (for indexed drawing)
+pub const INDEX_TYPE_UINT16 = c.METAL_INDEX_TYPE_UINT16;
+pub const INDEX_TYPE_UINT32 = c.METAL_INDEX_TYPE_UINT32;
+
+// Indexed drawing function
+pub const metal_render_encoder_draw_indexed_primitives = c.metal_render_encoder_draw_indexed_primitives;
+
 // Drawable functions
 pub const metal_drawable_get_texture = c.metal_drawable_get_texture;
 pub const metal_drawable_present = c.metal_drawable_present;

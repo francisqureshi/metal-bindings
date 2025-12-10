@@ -628,6 +628,12 @@ pub const PrimitiveType = enum(u32) {
     triangle_strip = c.PRIMITIVE_TYPE_TRIANGLE_STRIP,
 };
 
+/// Index type for indexed drawing
+pub const IndexType = enum(u32) {
+    uint16 = c.INDEX_TYPE_UINT16,
+    uint32 = c.INDEX_TYPE_UINT32,
+};
+
 /// Render pipeline descriptor for creating render pipelines
 pub const RenderPipelineDescriptor = struct {
     pixel_format: PixelFormat = .bgra8_unorm,
@@ -713,6 +719,10 @@ pub const MetalRenderEncoder = struct {
 
     pub fn drawPrimitives(self: *MetalRenderEncoder, primitive_type: PrimitiveType, vertex_start: u32, vertex_count: u32) void {
         c.metal_render_encoder_draw_primitives(self.handle, @intFromEnum(primitive_type), vertex_start, vertex_count);
+    }
+
+    pub fn drawIndexedPrimitives(self: *MetalRenderEncoder, primitive_type: PrimitiveType, index_count: u32, index_buffer: *MetalBuffer, index_buffer_offset: u32) void {
+        c.metal_render_encoder_draw_indexed_primitives(self.handle, @intFromEnum(primitive_type), index_count, @intFromEnum(IndexType.uint16), index_buffer.handle, index_buffer_offset);
     }
 
     pub fn end(self: *MetalRenderEncoder) void {
