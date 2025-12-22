@@ -360,6 +360,12 @@ void metal_render_encoder_set_fragment_bytes(MetalCommandEncoder encoder, const 
     [enc setFragmentBytes:bytes length:length atIndex:index];
 }
 
+void metal_render_encoder_set_fragment_texture(MetalCommandEncoder encoder, MetalTexture texture, uint32_t index) {
+    id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
+    id<MTLTexture> tex = (__bridge id<MTLTexture>)texture;
+    [enc setFragmentTexture:tex atIndex:index];
+}
+
 void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t vertex_start, uint32_t vertex_count) {
     id<MTLRenderCommandEncoder> enc = (__bridge id<MTLRenderCommandEncoder>)encoder;
     [enc drawPrimitives:(MTLPrimitiveType)primitive_type vertexStart:vertex_start vertexCount:vertex_count];

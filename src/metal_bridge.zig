@@ -85,6 +85,7 @@ pub const metal_render_encoder_set_vertex_buffer = c.metal_render_encoder_set_ve
 pub const metal_render_encoder_set_vertex_bytes = c.metal_render_encoder_set_vertex_bytes;
 pub const metal_render_encoder_set_fragment_buffer = c.metal_render_encoder_set_fragment_buffer;
 pub const metal_render_encoder_set_fragment_bytes = c.metal_render_encoder_set_fragment_bytes;
+pub const metal_render_encoder_set_fragment_texture = c.metal_render_encoder_set_fragment_texture;
 pub const metal_render_encoder_draw_primitives = c.metal_render_encoder_draw_primitives;
 
 // Pixel format constants

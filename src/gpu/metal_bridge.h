@@ -121,6 +121,7 @@ void metal_render_encoder_set_vertex_buffer(MetalCommandEncoder encoder, MetalBu
 void metal_render_encoder_set_vertex_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index);
 void metal_render_encoder_set_fragment_buffer(MetalCommandEncoder encoder, MetalBuffer buffer, uint32_t offset, uint32_t index);
 void metal_render_encoder_set_fragment_bytes(MetalCommandEncoder encoder, const void* bytes, uint32_t length, uint32_t index);
+void metal_render_encoder_set_fragment_texture(MetalCommandEncoder encoder, MetalTexture texture, uint32_t index);
 void metal_render_encoder_draw_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t vertex_start, uint32_t vertex_count);
 void metal_render_encoder_draw_indexed_primitives(MetalCommandEncoder encoder, uint32_t primitive_type, uint32_t index_count, uint32_t index_type, MetalBuffer index_buffer, uint32_t index_buffer_offset);
 

@@ -717,6 +717,10 @@ pub const MetalRenderEncoder = struct {
         c.metal_render_encoder_set_fragment_bytes(self.handle, bytes, length, index);
     }
 
+    pub fn setFragmentTexture(self: *MetalRenderEncoder, texture: *MetalTexture, index: u32) void {
+        c.metal_render_encoder_set_fragment_texture(self.handle, texture.handle, index);
+    }
+
     pub fn drawPrimitives(self: *MetalRenderEncoder, primitive_type: PrimitiveType, vertex_start: u32, vertex_count: u32) void {
         c.metal_render_encoder_draw_primitives(self.handle, @intFromEnum(primitive_type), vertex_start, vertex_count);
     }
