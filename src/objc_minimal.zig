@@ -1,13 +1,12 @@
-//! Minimal objc wrapper for Zig 0.16 compatibility
-//! Only imports the parts we actually use, avoiding @Type issues
+//! Objective-C runtime wrapper with platform-specific helpers
+//! Provides BOOL conversion helpers and re-exports zig-objc functionality
 
 const objc_full = @import("objc");
 
-// Re-export everything except Block and the fancy msgSend wrapper
 pub const c = objc_full.c;
 
 /// On some targets, Objective-C uses `i8` instead of `bool`.
-/// This helper casts a `bool` value to the target value type.
+/// This helper casts a `bool` value to the target BOOL type.
 pub fn boolParam(param: bool) c.BOOL {
     return switch (c.BOOL) {
         bool => param,
@@ -17,7 +16,7 @@ pub fn boolParam(param: bool) c.BOOL {
 }
 
 /// On some targets, Objective-C uses `i8` instead of `bool`.
-/// This helper casts a target value type to `bool`.
+/// This helper casts a BOOL value to Zig `bool`.
 pub fn boolResult(result: c.BOOL) bool {
     return switch (c.BOOL) {
         bool => result,
@@ -25,6 +24,8 @@ pub fn boolResult(result: c.BOOL) bool {
         else => @compileError("unexpected boolean type"),
     };
 }
+
+// Re-export zig-objc types
 pub const AutoreleasePool = objc_full.AutoreleasePool;
 pub const Class = objc_full.Class;
 pub const getClass = objc_full.getClass;
@@ -41,7 +42,4 @@ pub const getProtocol = objc_full.getProtocol;
 pub const sel = objc_full.sel;
 pub const Sel = objc_full.Sel;
 pub const free = objc_full.free;
-
-// Note: We intentionally don't re-export Block or the type-building msgSend
-// because they use @Type which was removed in Zig 0.16.
-// We use Object.msgSend directly instead, which works fine.
+pub const Block = objc_full.Block;
