@@ -1,3 +1,0 @@
-[submodule "vendor/zig-objc"]
-	path = vendor/zig-objc
-	url = https://github.com/francisqureshi/zig-objc.git

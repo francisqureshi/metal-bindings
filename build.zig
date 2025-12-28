@@ -28,6 +28,12 @@ pub fn build(b: *std.Build) void {
     // to our consumers. We must give it a name because a Zig package can expose
     // multiple modules and consumers will need to be able to specify which
     // module they want to access.
+    // Get zig-objc dependency (lazy = true to skip their build.zig tests)
+    const objc_dep = b.lazyDependency("zig_objc", .{
+        .target = target,
+        .optimize = optimize,
+    }) orelse return;
+
     const mod = b.addModule("metal_bindings", .{
         // The root source file is the "entry point" of this module. Users of
         // this module will only be able to access public declarations contained
@@ -41,12 +47,10 @@ pub fn build(b: *std.Build) void {
         .target = target,
     });
 
-    // Add the Objective-C Metal bridge to the module
-    mod.addCSourceFile(.{
-        .file = b.path("src/gpu/metal_bridge.m"),
-        .flags = &.{"-fobjc-arc"},
-    });
-    mod.addIncludePath(b.path("src"));
+    // Add zig-objc module
+    mod.addImport("objc", objc_dep.module("objc"));
+
+    // Link Metal and Foundation frameworks (still needed for runtime)
     mod.linkFramework("Metal", .{});
     mod.linkFramework("Foundation", .{});
 

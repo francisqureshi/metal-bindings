@@ -26,7 +26,8 @@ pub fn main() !void {
         defer dev.deinit();
         if (dev.getName()) |name| {
             std.debug.print("  [{d}] {s}\n", .{ i, name });
-            std.c.free(@constCast(name.ptr));
+            // Note: name is from UTF8String which returns autorelease pool managed memory
+            // Don't free it!
         }
     }
     std.debug.print("\n", .{});
