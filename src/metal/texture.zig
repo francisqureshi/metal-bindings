@@ -54,4 +54,14 @@ pub const MetalTexture = struct {
             .{ data.ptr, @as(c_ulong, bytes_per_row), region, @as(c_ulong, 0) },
         );
     }
+
+    /// Get texture width
+    pub fn getWidth(self: *const MetalTexture) u64 {
+        return self.handle.msgSend(u64, objc.sel("width"), .{});
+    }
+
+    /// Get texture height
+    pub fn getHeight(self: *const MetalTexture) u64 {
+        return self.handle.msgSend(u64, objc.sel("height"), .{});
+    }
 };

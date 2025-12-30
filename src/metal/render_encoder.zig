@@ -67,6 +67,20 @@ pub const MetalRenderEncoder = struct {
         );
     }
 
+    pub fn drawPrimitivesInstanced(
+        self: *MetalRenderEncoder,
+        primitive_type: enums.PrimitiveType,
+        vertex_start: u32,
+        vertex_count: u32,
+        instance_count: u32,
+    ) void {
+        self.handle.msgSend(
+            void,
+            objc.sel("drawPrimitives:vertexStart:vertexCount:instanceCount:"),
+            .{ @intFromEnum(primitive_type), @as(c_ulong, vertex_start), @as(c_ulong, vertex_count), @as(c_ulong, instance_count) },
+        );
+    }
+
     pub fn drawIndexedPrimitives(
         self: *MetalRenderEncoder,
         primitive_type: enums.PrimitiveType,
@@ -83,6 +97,28 @@ pub const MetalRenderEncoder = struct {
                 @intFromEnum(enums.IndexType.uint16),
                 index_buffer.handle,
                 @as(c_ulong, index_buffer_offset),
+            },
+        );
+    }
+
+    pub fn drawIndexedPrimitivesInstanced(
+        self: *MetalRenderEncoder,
+        primitive_type: enums.PrimitiveType,
+        index_count: u32,
+        index_buffer: *Buffer,
+        index_buffer_offset: u32,
+        instance_count: u32,
+    ) void {
+        self.handle.msgSend(
+            void,
+            objc.sel("drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferOffset:instanceCount:"),
+            .{
+                @intFromEnum(primitive_type),
+                @as(c_ulong, index_count),
+                @intFromEnum(enums.IndexType.uint16),
+                index_buffer.handle,
+                @as(c_ulong, index_buffer_offset),
+                @as(c_ulong, instance_count),
             },
         );
     }

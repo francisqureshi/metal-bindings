@@ -15,6 +15,7 @@ pub const ResourceStorageMode = enum(u32) {
 /// Pixel format for textures and render targets
 pub const PixelFormat = enum(u32) {
     bgra8_unorm = 80,
+    bgra8_unorm_srgb = 81,  // sRGB variant: auto gamma-encode after blending
     rgba8_unorm = 70,
     rgba32_float = 125,
     r8_unorm = 10,

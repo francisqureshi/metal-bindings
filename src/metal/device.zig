@@ -118,14 +118,14 @@ pub const MetalDevice = struct {
     }
 
     /// Create 2D texture
-    pub fn createTexture(self: *MetalDevice, width: u32, height: u32, writable: bool) MetalError!Texture {
+    pub fn createTextureWithFormat(self: *MetalDevice, width: u32, height: u32, format: enums.PixelFormat, writable: bool) MetalError!Texture {
         // Create MTLTextureDescriptor
         const MTLTextureDescriptor = objc.getClass("MTLTextureDescriptor").?;
         const desc = MTLTextureDescriptor.msgSend(
             objc.Object,
             objc.sel("texture2DDescriptorWithPixelFormat:width:height:mipmapped:"),
             .{
-                @intFromEnum(enums.PixelFormat.rgba32_float),
+                @intFromEnum(format),
                 @as(c_ulong, width),
                 @as(c_ulong, height),
                 false,
@@ -140,6 +140,11 @@ pub const MetalDevice = struct {
         if (texture.value == null) return MetalError.TextureCreationFailed;
 
         return .{ .handle = texture };
+    }
+
+    /// Create 2D texture with default RGBA32Float format
+    pub fn createTexture(self: *MetalDevice, width: u32, height: u32, writable: bool) MetalError!Texture {
+        return self.createTextureWithFormat(width, height, .rgba32_float, writable);
     }
 };
 
