@@ -13,20 +13,31 @@ pub const ResourceStorageMode = enum(u32) {
 };
 
 /// Pixel format for textures and render targets
+/// https://developer.apple.com/documentation/metal/mtlpixelformat
 pub const PixelFormat = enum(u32) {
+    r8_unorm = 10,
+    rgba8_unorm = 70,
     bgra8_unorm = 80,
     bgra8_unorm_srgb = 81,  // sRGB variant: auto gamma-encode after blending
-    rgba8_unorm = 70,
+    rgb10a2_unorm = 90,     // 10-bit RGB + 2-bit alpha (standard HDR format)
     rgba32_float = 125,
-    r8_unorm = 10,
+    bgra10_xr = 554,        // 10-bit extended range BGR (wide color)
+    bgr10_xr = 555,         // 10-bit extended range BGR, no alpha
 };
 
 /// Blend factor for render pipeline blending
+/// https://developer.apple.com/documentation/metal/mtlblendfactor
 pub const BlendFactor = enum(u32) {
     zero = 0,
     one = 1,
-    source_alpha = 6,
-    one_minus_source_alpha = 7,
+    source_color = 2,
+    one_minus_source_color = 3,
+    source_alpha = 4,
+    one_minus_source_alpha = 5,
+    dest_color = 6,
+    one_minus_dest_color = 7,
+    dest_alpha = 8,
+    one_minus_dest_alpha = 9,
 };
 
 /// Blend operation for render pipeline blending
