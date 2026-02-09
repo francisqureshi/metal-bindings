@@ -16,6 +16,9 @@ pub const MetalRenderPassDescriptor = struct {
             .{},
         );
 
+        // Retain the autoreleased descriptor so we own it
+        _ = desc.msgSend(objc.Object, objc.sel("retain"), .{});
+
         return .{ .handle = desc };
     }
 
