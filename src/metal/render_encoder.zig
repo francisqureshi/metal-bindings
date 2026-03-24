@@ -123,6 +123,22 @@ pub const MetalRenderEncoder = struct {
         );
     }
 
+    pub fn setScissorRect(self: *MetalRenderEncoder, x: u32, y: u32, width: u32, height: u32) void {
+        const ScissorRect = extern struct {
+            x: c_ulong,
+            y: c_ulong,
+            width: c_ulong,
+            height: c_ulong,
+        };
+        const rect = ScissorRect{
+            .x = @as(c_ulong, x),
+            .y = @as(c_ulong, y),
+            .width = @as(c_ulong, width),
+            .height = @as(c_ulong, height),
+        };
+        self.handle.msgSend(void, objc.sel("setScissorRect:"), .{rect});
+    }
+
     pub fn end(self: *MetalRenderEncoder) void {
         self.handle.msgSend(void, objc.sel("endEncoding"), .{});
     }
