@@ -33,7 +33,7 @@
     // internet connectivity.
     .dependencies = .{
         .zig_objc = .{
-            .url = "git+https://github.com/francisqureshi/zig-objc.git#716730eac33c124ede19d009b2fead1dcc35bfd0",
+            .url = "git+https://github.com/francisqureshi/zig-objc.git#658ccc551712a8a460f73f765bda44016b23f493",
             .hash = "zig_objc-0.0.0-Ir_Sp8cmAQCdD_sh43DptZUQh__T1aeXMy4I1U0UyJtG",
         },
     },

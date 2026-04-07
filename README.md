@@ -29,7 +29,7 @@ exe.root_module.addImport("metal", metal_dep.module("metal_bindings"));
 
 ## Architecture
 
-This library uses [zig-objc](https://github.com/francisqureshi/zig-objc) for Objective-C runtime interop, providing direct access to Metal APIs without C bridge code. All Metal objects are wrapped in Zig types with proper lifetime management.
+This library uses [zig-objc](https://github.com/mitchellh/zig-objc) for Objective-C runtime interop, providing direct access to Metal APIs without C bridge code. All Metal objects are wrapped in Zig types with proper lifetime management.
 
 ## Quick Start
 
@@ -337,7 +337,7 @@ Metal is not available on non-Apple platforms.
 
 ## Dependencies
 
-- [zig-objc](https://github.com/francisqureshi/zig-objc) - Objective-C runtime bindings (Zig 0.16 compatible)
+- [zig-objc](https://github.com/mitchellh/zig-objc) - Objective-C runtime bindings 
 
 ## License
 
